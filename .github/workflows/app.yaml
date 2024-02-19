@@ -54,7 +54,6 @@ jobs:
   
   deploy_prod:
     name: deploy_prod
-    needs: [deploy_dev]
     environment: 
       name: production
       url: http://final-project.devops-fairy.cloudns.biz/
