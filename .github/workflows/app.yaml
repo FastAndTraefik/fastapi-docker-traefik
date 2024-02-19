@@ -75,5 +75,4 @@ jobs:
         git clone https://github.com/FastAndTraefik/fastapi-docker-traefik.git
 
     - name: Install Charts db and Fastapi - prod
-      run: |
-        helm install prod ./yaml-files/fastapi-app-chart
+      run: cd fastapi-docker-traefik && helm install prod ./yaml-files/fastapi-app-chart
