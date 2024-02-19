@@ -68,7 +68,19 @@ jobs:
         aws-region: ${{ vars.AWS_DEFAULT_REGION }}
         
     - name: Update kube config
-      run: aws eks update-kubeconfig --name ${{ vars.EKS_CLUSTER_NAME }} --region ${{ vars.AWS_DEFAULT_REGION }}
+      run: |
+        aws eks update-kubeconfig --name ${{ vars.EKS_CLUSTER_NAME }} --region ${{ vars.AWS_DEFAULT_REGION }}
+        
+        # Debug: Print the content of kubeconfig file
+        cat $HOME/.kube/config
+
+        # Debug: Check kubectl version
+        kubectl version --client
+
+        # Debug: List Kubernetes nodes
+        kubectl get nodes -o wide
+
+
 
     - name: Clone charts HELM
       run: |
