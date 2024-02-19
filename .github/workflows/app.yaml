@@ -76,4 +76,4 @@ jobs:
 
     - name: Install Charts db and Fastapi - prod
       run: |
-        helm upgrade --install fastapi-db ./yaml-files/fastapi-app-chart --values=./yaml-files/fastapi-app-chart/values.yaml --namespace prod
+        helm install prod ./yaml-files/fastapi-app-chart
