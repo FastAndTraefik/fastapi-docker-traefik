@@ -1,0 +1,36 @@
+# web-service-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-web-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fastapi-traefik
+  template:
+    metadata:
+      labels:
+        app: fastapi-traefik
+    spec:
+      containers:
+      - name: web
+        image: {{ .Values.web.image.repository }}:{{ .Values.web.image.tag }}
+        ports:
+        - containerPort: {{ .Values.web.containerPort }}
+        env:
+        - name: DATABASE_URL
+          value: postgresql://{{ .Values.postgres.username }}:{{ .Values.postgres.password }}@{{ .Values.postgres.host }}:{{ .Values.postgres.port }}/{{ .Values.postgres.database }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-web-service
+spec:
+  selector:
+    app: fastapi-traefik
+  ports:
+    - protocol: "TCP"
+      port: {{ .Values.web.servicePort }}
+      targetPort: {{ .Values.web.containerPort }}
+

@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-deployment
+  labels:
+     app: fastapi-traefik
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fastapi-traefik
+  template:
+    metadata:
+      labels:
+        app: fastapi-traefik
+    spec:
+      containers:
+      - name: web-service
+        image: shubha1997/fastapi-docker-traefik_web:latest  # Replace with your local image name and tag
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8000
+        env:
+        - name: DATABASE_URL
+          value: postgresql://fastapi_traefik:fastapi_traefik@postgres-service:5432/fastapi_traefik
+        command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-service
+spec:
+  selector:
+    app: fastapi-traefik
+  ports:
+    - port: 80
+      targetPort: 8000

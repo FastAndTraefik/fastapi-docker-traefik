@@ -1,0 +1,28 @@
+# values.yaml
+webDeployment:
+  replicaCount: 1
+  image:
+    repository: shubha1997/fastapi-docker-traefik_web
+    tag: latest
+    pullPolicy: IfNotPresent
+  port: 8000
+  databaseURL: postgresql://fastapi_traefik:fastapi_traefik@{{ .Release.Name }}-postgres-service:5432/fastapi_traefik
+
+webService:
+  port: 80
+
+postgresStatefulSet:
+  replicas: 2
+  image:
+    repository: postgres
+    tag: 15-alpine
+  port: 5432
+  postgresUser: fastapi_traefik
+  postgresPassword: fastapi_traefik
+  postgresDatabase: fastapi_traefik
+  locale: C.UTF-8
+
+ingress:
+  name: k8s-alb
+  ingressClassName: alb
+

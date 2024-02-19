@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fastapi-traefik
+  template:
+    metadata:
+      labels:
+        app: fastapi-traefik
+    spec:
+      containers:
+      - name: web
+        image: fastapi-docker-traefik_web
+        ports:
+        - containerPort: 8000
+        env:
+        - name: DATABASE_URL
+          value: postgresql://fastapi_traefik:fastapi_traefik@db:5432/fastapi_traefik
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-service
+spec:
+  selector:
+    app: fastapi-traefik
+  ports:
+    - protocol: "TCP"
+      port: 8000
+      targetPort: 8000
+

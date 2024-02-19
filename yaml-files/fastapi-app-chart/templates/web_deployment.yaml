@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-web-deployment
+  labels:
+     app: fastapi-traefik
+spec:
+  replicas: {{ .Values.webDeployment.replicaCount }}
+  selector:
+    matchLabels:
+      app: fastapi-traefik
+  template:
+    metadata:
+      labels:
+        app: fastapi-traefik
+    spec:
+      containers:
+      - name: web-service
+        image: {{ .Values.webDeployment.image.repository }}:{{ .Values.webDeployment.image.tag }}
+        imagePullPolicy: {{ .Values.webDeployment.image.pullPolicy }}
+        ports:
+        - containerPort: {{ .Values.webDeployment.port }}
+        env:
+        - name: DATABASE_URL
+          value: {{ .Values.webDeployment.databaseURL }}
+        command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "{{ .Values.webDeployment.port }}"]
+

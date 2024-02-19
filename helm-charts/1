@@ -1,0 +1,236 @@
+NAME: test
+LAST DEPLOYED: Mon Jan 29 15:53:51 2024
+NAMESPACE: default
+STATUS: pending-install
+REVISION: 1
+TEST SUITE: None
+HOOKS:
+MANIFEST:
+---
+# Source: fastapi/templates/traefik-account.yaml
+# traefik-account.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: test-traefik-account
+---
+# Source: fastapi/templates/postgres-service-deployment.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: test-postgres-storage
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+# Source: fastapi/templates/traefik-role.yaml
+# traefik-role.yaml
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: test-traefik-role
+
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - services
+      - endpoints
+      - secrets
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - extensions
+      - networking.k8s.io
+    resources:
+      - ingresses
+      - ingressclasses
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - extensions
+      - networking.k8s.io
+    resources:
+      - ingresses/status
+    verbs:
+      - update
+---
+# Source: fastapi/templates/traefik-role-binding.yaml
+# traefik-role-binding.yaml
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: test-traefik-role-binding
+
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: test-traefik-role
+subjects:
+  - kind: ServiceAccount
+    name: test-traefik-account
+    namespace: default
+---
+# Source: fastapi/templates/postgres-service-deployment.yaml
+# postgres-service-deployment.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: test-postgres-service
+spec:
+  selector:
+    app: postgres
+  ports:
+    - protocol: "TCP"
+      port: 5432
+      targetPort: 5432
+---
+# Source: fastapi/templates/traefik-service-deployment.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: test-traefik-dashboard-service
+
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 8080
+      targetPort: dashboard
+  selector:
+    app: traefik
+---
+# Source: fastapi/templates/traefik-service-deployment.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: test-traefik-web-service
+
+spec:
+  type: LoadBalancer
+  ports:
+    - targetPort: web
+      port: 80
+  selector:
+    app: traefik
+---
+# Source: fastapi/templates/web-service-deployment.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: test-web-service
+spec:
+  selector:
+    app: fastapi-traefik
+  ports:
+    - protocol: "TCP"
+      port: 8000
+      targetPort: 8000
+---
+# Source: fastapi/templates/traefik-service-deployment.yaml
+# traefik-service-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-traefik-deployment
+  labels:
+    app: traefik
+
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: traefik
+  template:
+    metadata:
+      labels:
+        app: traefik
+    spec:
+      serviceAccountName: test-traefik-account
+      containers:
+        - name: traefik
+          image: traefik:v2.10
+          args:
+            - --api.insecure
+            - --providers.kubernetes
+          ports:
+            - name: web
+              containerPort: 80
+            - name: dashboard
+              containerPort: 8080
+      volumes:
+        - name: traefik-config
+          hostPath:
+            path: /home/ubuntu/gitlab_exam/gitlab_final_project/fastapi-docker-traefik/yaml-files
+---
+# Source: fastapi/templates/web-service-deployment.yaml
+# web-service-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-web-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fastapi-traefik
+  template:
+    metadata:
+      labels:
+        app: fastapi-traefik
+    spec:
+      containers:
+      - name: web
+        image: shubha1997/fastapi-docker-traefik_web:latest
+        ports:
+        - containerPort: 8000
+        env:
+        - name: DATABASE_URL
+          value: postgresql://fastapi_traefik:fastapi_traefik@postgres-service:5432/fastapi_traefik
+---
+# Source: fastapi/templates/postgres-service-deployment.yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: test-postgres-statefulset
+spec:
+  replicas: 2
+  serviceName: test-postgres-service
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:15-alpine
+        ports:
+        - containerPort: 5432
+        env:
+        - name: POSTGRES_USER
+          value: fastapi_traefik
+        - name: POSTGRES_PASSWORD
+          value: fastapi_traefik
+        - name: POSTGRES_DB
+          value: fastapi_traefik
+        volumeMounts:
+        - name: postgres-storage
+          mountPath: /var/lib/postgresql/data
+  volumeClaimTemplates:
+  - metadata:
+      name: postgres-storage
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: 1Gi
+

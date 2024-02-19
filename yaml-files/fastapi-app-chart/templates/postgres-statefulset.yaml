@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ .Release.Name }}-postgres-statefulset
+spec:
+  replicas: {{ .Values.postgresStatefulSet.replicas }}
+  serviceName: {{ .Release.Name }}-postgres-service
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+      - name: postgres
+        image: {{ .Values.postgresStatefulSet.image.repository }}:{{ .Values.postgresStatefulSet.image.tag }}
+        ports:
+        - containerPort: {{ .Values.postgresStatefulSet.port }}
+        env:
+        - name: POSTGRES_USER
+          value: {{ .Values.postgresStatefulSet.postgresUser }}
+        - name: POSTGRES_PASSWORD
+          value: {{ .Values.postgresStatefulSet.postgresPassword }}
+        - name: POSTGRES_DB
+          value: {{ .Values.postgresStatefulSet.postgresDatabase }}
+        - name: LC_ALL
+          value: {{ .Values.postgresStatefulSet.locale }}
+        - name: LANG
+          value: {{ .Values.postgresStatefulSet.locale }}
+

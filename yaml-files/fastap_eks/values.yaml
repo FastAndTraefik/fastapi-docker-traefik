@@ -1,0 +1,18 @@
+# Default values for fastapi-chart.
+# These can be overridden in the values.yaml or via command line arguments to 'helm install'
+webService:
+  image:
+    repository: shubha1997/fastapi-docker-traefik_web
+    tag: latest
+  port: 8000
+  databaseUrl: postgresql://fastapi_traefik:fastapi_traefik@postgres-service:5432/fastapi_traefik
+
+postgres:
+  image:
+    repository: postgres
+    tag: 15-alpine
+  port: 5432
+  user: fastapi_traefik
+  password: fastapi_traefik
+  database: fastapi_traefik
+

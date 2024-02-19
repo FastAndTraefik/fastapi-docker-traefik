@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "fastap_eks.fullname" . }}-test-connection"
+  labels:
+    {{- include "fastap_eks.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+spec:
+  containers:
+    - name: wget
+      image: busybox
+      command: ['wget']
+      args: ['{{ include "fastap_eks.fullname" . }}:{{ .Values.service.port }}']
+  restartPolicy: Never

@@ -1,0 +1,6 @@
+# Traefik dashboard over http
+[api]
+insecure = true
+
+[log]
+level = "DEBUG"

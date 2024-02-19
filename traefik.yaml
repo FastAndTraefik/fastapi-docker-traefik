@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: traefik-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: traefik
+  template:
+    metadata:
+      labels:
+        app: traefik
+    spec:
+      serviceAccountName: traefik-account
+      containers:
+      - name: traefik
+        image: traefik:v2.9.6
+        ports:
+        - containerPort: 80
+        - containerPort: 8080
+        volumeMounts:
+        - mountPath: "/etc/traefik/traefik.toml"
+          name: traefik
+        - mountPath: "/var/run/docker.sock"
+          name: dockersock
+      volumes:
+      - name: dockersock
+        hostPath:
+          path: /var/run/docker.sock
+      - name: traefik
+        hostPath:
+          path: /home/ubuntu/gitlab_exam/gitlab_final_project/fastapi-docker-traefik/traefik.dev.toml
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: traefik-service
+spec:
+  selector:
+    app: traefik
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 80
+    - name: dashboard
+      protocol: TCP
+      port: 8080
+      targetPort: 8080
+  type: LoadBalancer
+

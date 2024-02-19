@@ -1,0 +1,25 @@
+web:
+  image:
+    repository: shubha1997/fastapi-docker-traefik_web
+    tag: latest
+  containerPort: 8000
+  servicePort: 8000
+
+postgres:
+  image:
+    repository: postgres
+    tag: 15-alpine
+  username: fastapi_traefik
+  password: fastapi_traefik
+  database: fastapi_traefik
+  host: postgres-service
+  port: 5432
+
+ingress:
+  host: fastapi.shubha-datascientest.cloudns.biz
+
+traefik:
+  image:
+    repository: traefik
+    tag: v2.10
+

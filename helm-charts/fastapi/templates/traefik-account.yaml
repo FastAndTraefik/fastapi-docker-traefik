@@ -1,0 +1,6 @@
+# traefik-account.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ .Release.Name }}-traefik-account
+
