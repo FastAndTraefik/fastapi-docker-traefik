@@ -41,34 +41,6 @@ on:
           echo "Pushing Docker image to ECR..."
           docker push $ECR_REGISTRY/$ECR_REPOSITORY --all-tags
           echo "Docker image pushed successfully."
-      
-    deploy_dev:
-      name: deploy_dev
-      needs: [build]
-      environment: 
-        name: dev
-        url: http://final-project.devops-fairy.cloudns.biz/
-      runs-on: ubuntu-latest
-  
-      steps:
-        
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ vars.AWS_DEFAULT_REGION }}
-          
-      - name: Update kube config
-        run: aws eks update-kubeconfig --name ${{ vars.EKS_CLUSTER_NAME }} --region ${{ vars.AWS_DEFAULT_REGION }}
-  
-      - name: Clone charts HELM
-        run: |
-          git clone https://github.com/FastAndTraefik/fastapi-docker-traefik.git
-        
-      - name: Install Charts db and Fastapi - dev
-        run: |
-          helm upgrade --install fastapi-db ./helm-chart-fastapi --values=./helm-chart-fastapi/fastapi-app-chart/values.yaml --namespace dev
     
     deploy_prod:
       name: deploy_prod
@@ -79,7 +51,6 @@ on:
       runs-on: ubuntu-latest
   
       steps:
-      
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -96,4 +67,4 @@ on:
   
       - name: Install Charts db and Fastapi - prod
         run: |
-          helm upgrade --install fastapi-db ./helm-chart-fastapi --values=./helm-chart-fastapi/fastapi-app-chart/values.yaml --namespace prod
+          helm upgrade --install fastapi-db ./yaml-files/fastapi-app-chart --values=./yaml-files/fastapi-app-chart/values.yaml --namespace prod
