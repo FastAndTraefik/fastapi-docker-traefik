@@ -1,78 +1,54 @@
-name: Deploy App FastApi
+name: CI/CD on AWS
 
 on:
-  workflow_run:
-    workflows:
-      - Python
-    types:
-      - completed
-  
+  push:
+    branches:
+      - main
+
+env: 
+  AWS_REGION: us-east-1
+  ECR_REPOSITORY: fastandtraefik
+  EKS_CLUSTER_NAME: eks-cluster-production
+  HELM_CHART_NAME: fastapi-db
+
 jobs:
   build:
-    name: Build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check Workflow Python status
-        run: |
-          if [[ "${{ github.event.workflow_run.conclusion }}" == "success" ]]; then
-            echo "Workflow Python was successful."
-          else
-            echo "Workflow Python failed."
-            exit 1
-          fi
-      - name: Checkout
-        uses: actions/checkout@v3
-  
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ vars.AWS_DEFAULT_REGION }}
-  
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v1
-  
-      - name: Get Short GitHub SHA and Save in Environment Variable
-        run: echo "SHORT_GITHUB_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
-  
-      - name: Build, tag, and push the image to Amazon ECR
-        id: build-image
-        env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: ${{ secrets.REPO_NAME }}
-          IMAGE_TAG: latest
-        run: |
-          echo "Building Docker image..."
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY:$SHORT_GITHUB_SHA . 
-          echo "Docker image built successfully."
-      
-          echo "Pushing Docker image to ECR..."
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY --all-tags
-          echo "Docker image pushed successfully."
-  
-  deploy_prod:
-    name: deploy_prod
-    environment: 
-      name: production
-      url: http://final-project.devops-fairy.cloudns.biz/
     runs-on: ubuntu-latest
 
     steps:
-    - name: Configure AWS credentials
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    - name: Configure AWS Credentials  
       uses: aws-actions/configure-aws-credentials@v1
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ${{ vars.AWS_DEFAULT_REGION }}
-        
-    - name: Update kube config
-      run: aws eks update-kubeconfig --name ${{ vars.EKS_CLUSTER_NAME }} --region ${{ vars.AWS_DEFAULT_REGION }}
+        aws-region: ${{ env.AWS_REGION }}
+      
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v1
 
-    - name: Clone charts HELM
+    - name: Git commit SHA
+      id: commit
+      uses: prompt/actions-commit-hash@v2
+
+    - name: Build, tag and push docker image to Amazon ECR
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        IMAGE_TAG: ${{ steps.commit.outputs.short }}
       run: |
-        git clone https://github.com/FastAndTraefik/fastapi-docker-traefik.git
+         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
-    - name: Install Charts db and Fastapi - prod
-      run: cd fastapi-docker-traefik && helm install prod ./yaml-files/fastapi-app-chart
+    - name: Update KubeConfig 
+      run: |
+         aws eks update-kubeconfig --name ${{ env.EKS_CLUSTER_NAME }} --region=${{ env.AWS_REGION }}
+      
+    - name: Deploy Helm Chart To Amazon EKS Cluster
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        IMAGE_TAG: ${{ steps.commit.outputs.short }}
+      run: |
+         helm install ${{ env.HELM_CHART_NAME }} ./yaml-files/fastapi-app-chart --set containers.image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
