@@ -1,9 +1,8 @@
 name: Deploy App FastApi
 
 on:
-  push:
-    branches:
-      - "*"
+  - push
+  - pull_request
   
 jobs:
   build:
