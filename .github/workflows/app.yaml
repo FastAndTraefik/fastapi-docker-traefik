@@ -70,7 +70,7 @@ jobs:
           echo 'EOF' >> $GITHUB_ENV
           kubectl config set-context arn:aws:eks:${{ vars.AWS_DEFAULT_REGION }}:${{ secrets.AWS_ACCOUNT }}:cluster/${{ vars.EKS_CLUSTER_NAME }}
 
-    - name: Clone charts HELM
+    - name: Clone Helm Charts
       run: |
         git clone https://github.com/FastAndTraefik/fastapi-docker-traefik.git
 
