@@ -52,32 +52,32 @@ jobs:
       name: production
       url: http://final-project.devops-fairy.cloudns.biz/
     steps:
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v2
-      with:
-        role-to-assume: ${{secrets.AWS_IAM_ROLE}}
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ${{ vars.AWS_DEFAULT_REGION }}
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: ${{secrets.AWS_IAM_ROLE}}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ vars.AWS_DEFAULT_REGION }}
 
-    - name: Helm Setup
-      uses: koslib/helm-eks-action@master
-      with:
-        command: |
-          aws eks update-kubeconfig --region ${{ vars.AWS_DEFAULT_REGION }} --name ${{ vars.EKS_CLUSTER_NAME }} --role-arn ${{ secrets.AWS_IAM_ROLE }} --kubeconfig ./kubeconfig
-          echo 'KUBE_CONFIG_DATA<<EOF' >> $GITHUB_ENV
-          echo $(cat ./kubeconfig | base64) >> $GITHUB_ENV
-          echo 'EOF' >> $GITHUB_ENV
-          kubectl config set-context arn:aws:eks:${{ vars.AWS_DEFAULT_REGION }}:${{ secrets.AWS_ACCOUNT }}:cluster/${{ vars.EKS_CLUSTER_NAME }}
+      - name: Helm Setup
+        uses: koslib/helm-eks-action@master
+        with:
+          command: |
+            aws eks update-kubeconfig --region ${{ vars.AWS_DEFAULT_REGION }} --name ${{ vars.EKS_CLUSTER_NAME }} --role-arn ${{ secrets.AWS_IAM_ROLE }} --kubeconfig ./kubeconfig
+            echo 'KUBE_CONFIG_DATA<<EOF' >> $GITHUB_ENV
+            echo $(cat ./kubeconfig | base64) >> $GITHUB_ENV
+            echo 'EOF' >> $GITHUB_ENV
+            kubectl config set-context arn:aws:eks:${{ vars.AWS_DEFAULT_REGION }}:${{ secrets.AWS_ACCOUNT }}:cluster/${{ vars.EKS_CLUSTER_NAME }}
 
-    - name: Clone Helm Charts
-      run: |
-        git clone https://github.com/FastAndTraefik/fastapi-docker-traefik.git
+      - name: Clone Helm Charts
+        run: |
+          git clone https://github.com/FastAndTraefik/fastapi-docker-traefik.git
 
-    - name: Helm Deploy
-      uses: koslib/helm-eks-action@master
-      env:
-        KUBE_CONFIG_DATA: ${{ env.KUBE_CONFIG_DATA }}
-      with:
-        command: |
-          cd fastapi-docker-traefik && helm install prod ./yaml-files/fastapi-app-chart --debug
+      - name: Helm Deploy
+        uses: koslib/helm-eks-action@master
+        env:
+          KUBE_CONFIG_DATA: ${{ env.KUBE_CONFIG_DATA }}
+        with:
+          command: |
+            cd fastapi-docker-traefik && helm install prod ./yaml-files/fastapi-app-chart --debug
