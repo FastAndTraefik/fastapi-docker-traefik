@@ -1,25 +1,15 @@
 name: Deploy App FastApi
 
 on:
-  workflow_run:
-    workflows:
-      - Python
-    types:
-      - completed
+  push:
+    branches:
+      - "*"
   
 jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
     steps:
-      - name: Check Workflow Python status
-        run: |
-          if [[ "${{ github.event.workflow_run.conclusion }}" == "success" ]]; then
-            echo "Workflow Python was successful."
-          else
-            echo "Workflow Python failed."
-            exit 1
-          fi
       - name: Checkout
         uses: actions/checkout@v3
   
