@@ -11,6 +11,10 @@ env:
   EKS_CLUSTER_NAME: eks-cluster-production
   HELM_CHART_NAME: fastapi-db
 
+permissions:
+    id-token: write
+    contents: read
+
 jobs:
   build:
     runs-on: ubuntu-latest
