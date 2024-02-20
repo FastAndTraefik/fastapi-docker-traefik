@@ -54,3 +54,4 @@ jobs:
         IMAGE_TAG: ${{ steps.commit.outputs.short }}
       run: |
          helm install ${{ env.HELM_CHART_NAME }} ./yaml-files/fastapi-app-chart --set containers.image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+# comment
