@@ -78,5 +78,6 @@ jobs:
           KUBE_CONFIG_DATA: ${{ env.KUBE_CONFIG_DATA }}
         with:
           command: |
-            cd fastapi-docker-traefik && helm install prod ./yaml-files/fastapi-app-chart --debug
+            cd fastapi-docker-traefik
+            helm install prod ./yaml-files/fastapi-app-chart --debug
             kubectl get ingress
