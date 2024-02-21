@@ -62,7 +62,7 @@ jobs:
         uses: koslib/helm-eks-action@master
         with:
           command: |
-            aws eks update-kubeconfig --region ${{ vars.AWS_DEFAULT_REGION }} --name ${{ vars.EKS_CLUSTER_NAME }} --role-arn ${{ secrets.AWS_IAM_ROLE }} --kubeconfig ./kubeconfig
+            aws eks update-kubeconfig --region ${{ vars.AWS_DEFAULT_REGION }} --name ${{ vars.EKS_CLUSTER_NAME }} --kubeconfig ./kubeconfig
             echo 'KUBE_CONFIG_DATA<<EOF' >> $GITHUB_ENV
             echo $(cat ./kubeconfig | base64) >> $GITHUB_ENV
             echo 'EOF' >> $GITHUB_ENV
