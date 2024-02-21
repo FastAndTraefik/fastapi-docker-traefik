@@ -6,7 +6,7 @@ webDeployment:
     tag: latest
     pullPolicy: IfNotPresent
   port: 8000
-  databaseURL: postgresql://fastapi_traefik:fastapi_traefik@{{ .Release.Name }}-postgres-service:5432/fastapi_traefik
+  databaseURL: postgresql://fastapi_traefik:fastapi_traefik@postgres-service:5432/fastapi_traefik
 
 webService:
   port: 80
