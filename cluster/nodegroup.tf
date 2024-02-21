@@ -41,9 +41,9 @@ resource "aws_eks_node_group" "prod-eks-node-group" {
   subnet_ids      = [aws_subnet.private-east-1a.id, aws_subnet.private-east-1b.id]
 
   scaling_config {
-    desired_size = 2
-    max_size     = 3
-    min_size     = 2
+    desired_size = 7
+    max_size     = 9
+    min_size     = 7
   }
 
   update_config {
