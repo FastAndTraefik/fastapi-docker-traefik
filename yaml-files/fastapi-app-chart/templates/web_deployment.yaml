@@ -22,6 +22,6 @@ spec:
         - containerPort: {{ .Values.webDeployment.port }}
         env:
         - name: DATABASE_URL
-          value: {{ .Values.webDeployment.databaseURL }}
+          value: postgresql://fastapi_traefik:fastapi_traefik@{{ .Release.Name }}-postgres-service:5432/fastapi_traefik
         command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "{{ .Values.webDeployment.port }}"]
 
