@@ -85,7 +85,7 @@ jobs:
             # --create-namespace \
             --version v1.14.2
             # Uncomment the line below if you want to install CRDs as part of the Helm release
-            # --set installCRDs=true
+            --set installCRDs=true
 
       - name: Clone Helm Charts
         run: |
