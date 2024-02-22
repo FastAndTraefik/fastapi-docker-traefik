@@ -79,5 +79,4 @@ jobs:
         with:
           command: |
             cd fastapi-docker-traefik
-            helm install prod ./yaml-files/fastapi-app-chart --debug
-            kubectl get ingress
+            helm upgrade --install --values=./yaml-files/fastapi-app-chart/values.yaml prod ./yaml-files/fastapi-app-chart --debug
