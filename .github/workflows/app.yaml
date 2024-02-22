@@ -51,6 +51,9 @@ jobs:
       name: production
       url: http://final-project.devops-fairy.cloudns.biz/
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -87,15 +90,10 @@ jobs:
             # Uncomment the line below if you want to install CRDs as part of the Helm release
             --set installCRDs=true
 
-      - name: Clone Helm Charts
-        run: |
-          git clone https://github.com/FastAndTraefik/fastapi-docker-traefik.git
-
       - name: Helm Deploy
         uses: koslib/helm-eks-action@master
         env:
           KUBE_CONFIG_DATA: ${{ env.KUBE_CONFIG_DATA }}
         with:
           command: |
-            cd fastapi-docker-traefik
             helm upgrade --install --values=./yaml-files/fastapi-app-chart/values.yaml prod ./yaml-files/fastapi-app-chart --debug
