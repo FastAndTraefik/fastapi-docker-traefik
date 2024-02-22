@@ -75,14 +75,14 @@ jobs:
 
       - name: Install cert-manager CRDs
         run: |
-          kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.14.2/cert-manager.crds.yaml
+          kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.14.2/cert-manager.crds.yaml --validate=false
 
       - name: Install cert-manager
         run: |
           helm install cert-manager jetstack/cert-manager \
             --namespace cert-manager \
             # Uncomment later if we would like to have namespaces, as it is a good practice to have namespaces for different apps/components
-            #--create-namespace \
+            # --create-namespace \
             --version v1.14.2
             # Uncomment the line below if you want to install CRDs as part of the Helm release
             # --set installCRDs=true
