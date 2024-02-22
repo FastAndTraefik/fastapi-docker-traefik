@@ -51,6 +51,9 @@ jobs:
       name: production
       url: http://final-project.devops-fairy.cloudns.biz/
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -68,15 +71,10 @@ jobs:
             echo 'EOF' >> $GITHUB_ENV
             kubectl config set-context arn:aws:eks:${{ vars.AWS_DEFAULT_REGION }}:${{ secrets.AWS_ACCOUNT }}:cluster/${{ vars.EKS_CLUSTER_NAME }}
 
-      - name: Clone Helm Charts
-        run: |
-          git clone https://github.com/FastAndTraefik/fastapi-docker-traefik.git
-
       - name: Helm Deploy
         uses: koslib/helm-eks-action@master
         env:
           KUBE_CONFIG_DATA: ${{ env.KUBE_CONFIG_DATA }}
         with:
           command: |
-            cd fastapi-docker-traefik
             helm upgrade --install --values=./yaml-files/fastapi-app-chart/values.yaml prod ./yaml-files/fastapi-app-chart --debug
