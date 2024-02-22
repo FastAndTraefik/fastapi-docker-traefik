@@ -70,6 +70,25 @@ jobs:
             echo $(cat ./kubeconfig | base64) >> $GITHUB_ENV
             echo 'EOF' >> $GITHUB_ENV
             kubectl config set-context arn:aws:eks:${{ vars.AWS_DEFAULT_REGION }}:${{ secrets.AWS_ACCOUNT }}:cluster/${{ vars.EKS_CLUSTER_NAME }}
+            
+      - name: Add Helm Repository
+        run: |
+          helm repo add jetstack https://charts.jetstack.io --force-update
+          helm repo update
+
+      - name: Install cert-manager CRDs
+        run: |
+          kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.14.2/cert-manager.crds.yaml --validate=false
+
+      - name: Install cert-manager
+        run: |
+          helm install cert-manager jetstack/cert-manager \
+            --namespace cert-manager \
+            # Uncomment later if we would like to have namespaces, as it is a good practice to have namespaces for different apps/components
+            # --create-namespace \
+            --version v1.14.2
+            # Uncomment the line below if you want to install CRDs as part of the Helm release
+            --set installCRDs=true
 
       - name: Helm Deploy
         uses: koslib/helm-eks-action@master
