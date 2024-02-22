@@ -58,6 +58,19 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ vars.AWS_DEFAULT_REGION }}
 
+      ### Terraform ###
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.7.3
+
+      - name: Terraform Formatting
+        id: fmt
+        run: terraform fmt -check
+        continue-on-error: true
+      
+      
+
       - name: Helm Setup
         uses: koslib/helm-eks-action@master
         with:
