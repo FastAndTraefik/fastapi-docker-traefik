@@ -67,6 +67,13 @@ jobs:
             echo $(cat ./kubeconfig | base64) >> $GITHUB_ENV
             echo 'EOF' >> $GITHUB_ENV
             kubectl config set-context arn:aws:eks:${{ vars.AWS_DEFAULT_REGION }}:${{ secrets.AWS_ACCOUNT }}:cluster/${{ vars.EKS_CLUSTER_NAME }}
+            
+      - name: Install Cert Manager
+        run: |
+          kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v1.5.4/cert-manager.yaml
+          kubectl wait --namespace cert-manager \
+            --for=condition=available deployment cert-manager-webhook \
+            --timeout=300s
 
       - name: Clone Helm Charts
         run: |
