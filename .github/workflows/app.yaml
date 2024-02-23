@@ -1,16 +1,22 @@
 name: Deploy App FastApi
 
 on:
-  - push
-  - pull_request
+  workflow_run:
+    workflows:
+      - "Python"
+    types:
+      - completed
   
 jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_branch }}
   
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
