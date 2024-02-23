@@ -42,8 +42,9 @@ jobs:
           echo "Docker image pushed successfully."
   
   deploy_prod:
-    name: deploy_prod
+    name: Deploy Production
     runs-on: ubuntu-latest
+    needs: build
     permissions:
       id-token: write
       contents: read
