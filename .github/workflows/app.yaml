@@ -95,10 +95,12 @@ jobs:
         if: steps.plan.outcome == 'failure'
         run: exit 1
 
-      - name: Terraform Apply
-        working-directory: ./cluster
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        run: terraform apply -auto-approve -input=false
+      # TODO: This cannot be used yet as the tf state is not correctly
+      # saved in the S3 bucket
+      # - name: Terraform Apply
+      #   working-directory: ./cluster
+      #   if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+      #   run: terraform apply -auto-approve -input=false
 
       - name: Helm Setup
         uses: koslib/helm-eks-action@master
