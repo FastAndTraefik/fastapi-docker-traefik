@@ -9,7 +9,8 @@ resource "aws_internet_gateway" "gw" {
   tags = {
     Name = "main-ig-gateway"
   }
-}# network.tf
+}
+# network.tf
 resource "aws_subnet" "private-east-1a" {
   vpc_id     = aws_vpc.eks-cluster-vpc.id
   cidr_block = "10.0.1.0/24"
