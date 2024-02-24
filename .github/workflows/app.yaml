@@ -8,6 +8,7 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -76,10 +77,7 @@ jobs:
       - name: Terraform Init
         id: init
         working-directory: ./cluster
-        env:
-          AWS_BUCKET_NAME: ${{ secrets.AWS_BUCKET_NAME_TF }}
-          AWS_BUCKET_KEY_NAME: ${{ secrets.AWS_BUCKET_KEY_NAME_TF_STATE }}
-        run: terraform init -backend-config="bucket=${AWS_BUCKET_NAME}" -backend-config="key=${AWS_BUCKET_KEY_NAME}" -backend-config="region=${AWS_REGION}"
+        run: terraform init -backend-config="bucket=${{ secrets.AWS_BUCKET_NAME_TF }}" -backend-config="key=${{ secrets.AWS_BUCKET_KEY_NAME_TF_STATE }}" -backend-config="region=${{ vars.AWS_DEFAULT_REGION }}"
 
       - name: Terraform Validate
         id: validate
