@@ -90,7 +90,7 @@ jobs:
         id: plan
         working-directory: ./cluster
         run: terraform plan -no-color
-        # if: github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request'
         continue-on-error: true
 
       - name: Terraform Plan Status
@@ -99,7 +99,7 @@ jobs:
 
       - name: Terraform Apply
         working-directory: ./cluster
-        # if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: terraform apply -auto-approve -input=false
 
       - name: Helm Setup
