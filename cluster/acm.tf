@@ -1,6 +1,6 @@
 # configured aws provider with proper credentials
 provider "aws" {
-  region    = us-east-1
+  region    = "us-east-1"
   profile   = "student33_nov23_bootcamp_do_inter_fastapi"
 }
 
