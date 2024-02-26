@@ -16,8 +16,8 @@ spec:
     spec:
       containers:
       - name: web-service
-        image: shubha1997/fastapi-docker-traefik_web:latest  # Replace with your local image name and tag
-        imagePullPolicy: IfNotPresent
+        image: shubha1997/fastapi-docker-traefik_web:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 8000
         env:
