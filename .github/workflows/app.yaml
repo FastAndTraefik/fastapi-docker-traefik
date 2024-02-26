@@ -119,4 +119,3 @@ jobs:
           command: |
             echo "${{ env.KUBE_CONFIG_DATA }}" | base64 --decode
             helm upgrade --install --values=./yaml-files/fastapi-app-chart/values.yaml prod ./yaml-files/fastapi-app-chart --debug
-
