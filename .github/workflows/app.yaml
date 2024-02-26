@@ -8,7 +8,7 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    # if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -63,43 +63,43 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ vars.AWS_DEFAULT_REGION }}
 
-      ### Terraform ###
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: 1.7.3
+      # ### Terraform ###
+      # - name: Setup Terraform
+      #   uses: hashicorp/setup-terraform@v3
+      #   with:
+      #     terraform_version: 1.7.3
 
-      - name: Terraform Formatting
-        id: fmt
-        run: terraform fmt -check
-        continue-on-error: true
+      # - name: Terraform Formatting
+      #   id: fmt
+      #   run: terraform fmt -check
+      #   continue-on-error: true
 
-      - name: Terraform Init
-        id: init
-        working-directory: ./cluster
-        run: terraform init -backend-config="bucket=${{ secrets.AWS_BUCKET_NAME_TF }}" -backend-config="key=${{ secrets.AWS_BUCKET_KEY_NAME_TF_STATE }}" -backend-config="region=${{ vars.AWS_DEFAULT_REGION }}"
+      # - name: Terraform Init
+      #   id: init
+      #   working-directory: ./cluster
+      #   run: terraform init
 
-      - name: Terraform Validate
-        id: validate
-        working-directory: ./cluster
-        run: terraform validate -no-color
+      # - name: Terraform Validate
+      #   id: validate
+      #   working-directory: ./cluster
+      #   run: terraform validate -no-color
 
-      - name: Terraform Plan
-        id: plan
-        working-directory: ./cluster
-        run: terraform plan -no-color
-        if: github.event_name == 'pull_request'
-        continue-on-error: true
+      # - name: Terraform Plan
+      #   id: plan
+      #   working-directory: ./cluster
+      #   run: terraform plan -no-color -lock=false
+      #   # if: github.event_name == 'pull_request'
+      #   continue-on-error: true
 
-      # TODO: This cannot be used yet as the tf state is not correctly
-      # saved in the S3 bucket
+      # # TODO: This cannot be used yet as the tf state is not correctly
+      # # saved in the S3 bucket
       # - name: Terraform Plan Status
       #   if: steps.plan.outcome == 'failure'
       #   run: exit 1
       # - name: Terraform Apply
       #   working-directory: ./cluster
-      #   if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-      #   run: terraform apply -auto-approve -input=false
+      #   # if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+      #   run: terraform apply -auto-approve -input=false -lock=false
 
       - name: Helm Setup
         uses: koslib/helm-eks-action@master
@@ -117,4 +117,8 @@ jobs:
           KUBE_CONFIG_DATA: ${{ env.KUBE_CONFIG_DATA }}
         with:
           command: |
-            helm upgrade --install --values=./yaml-files/fastapi-app-chart/values.yaml prod ./yaml-files/fastapi-app-chart --debug
+            kubectl delete pods --all
+            helm install --values=./yaml-files/fastapi-app-chart/values.yaml prod ./yaml-files/fastapi-app-chart --debug
+            helm upgrade prod ./yaml-files/fastapi-app-chart --debug --force
+            
+            

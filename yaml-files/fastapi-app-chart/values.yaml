@@ -2,7 +2,7 @@
 webDeployment:
   replicaCount: 1
   image:
-    repository: shubha1997/fastapi-docker-traefik_web
+    repository: 690456518676.dkr.ecr.us-east-1.amazonaws.com/fastandtraefik
     tag: latest
     pullPolicy: IfNotPresent
   port: 8000
