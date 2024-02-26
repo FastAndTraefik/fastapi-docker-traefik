@@ -1,4 +1,9 @@
 from fastapi import FastAPI
+from fastapi.responses import Response
+from prometheus_client import CONTENT_TYPE_LATEST
+from prometheus_client import Counter
+from prometheus_client import Gauge
+from prometheus_client import generate_latest
 
 from app.db import database
 from app.db import User
@@ -6,10 +11,22 @@ from app.db import User
 
 app = FastAPI(title="FastAPI, Docker, and Traefik")
 
+REQUEST_COUNT = Counter("request_count", "App Request Count")
+IN_PROGRESS_REQUESTS = Gauge("in_progress_requests", "In Progress Requests")
+
 
 @app.get("/")
 async def read_root():
+    REQUEST_COUNT.inc()
     return await User.objects.all()
+
+
+@app.get("/metrics")
+def metrics():
+    IN_PROGRESS_REQUESTS.inc()
+    data = generate_latest()
+    IN_PROGRESS_REQUESTS.dec()
+    return Response(content=data, media_type=CONTENT_TYPE_LATEST)
 
 
 @app.on_event("startup")
