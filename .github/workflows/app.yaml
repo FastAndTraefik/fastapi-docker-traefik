@@ -117,7 +117,7 @@ jobs:
           KUBE_CONFIG_DATA: ${{ env.KUBE_CONFIG_DATA }}
         with:
           command: |
-            helm upgrade --install --values=./yaml-files/fastapi-app-chart/values.yaml prod ./yaml-files/fastapi-app-chart --debug
+            helm upgrade --install --values=./yaml-files/fastapi-app-chart/values.yaml prod ./yaml-files/fastapi-app-chart --debug --force
 
             
             

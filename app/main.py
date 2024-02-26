@@ -32,6 +32,7 @@ async def startup():
 
     # Now that the table exists, create dummy entries
     await User.objects.get_or_create(email="test@test.com")
+    await User.objects.get_or_create(email="test3@test.com")
 
 
 @app.on_event("shutdown")
