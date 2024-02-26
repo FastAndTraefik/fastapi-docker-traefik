@@ -15,7 +15,11 @@ async def read_root():
 async def startup():
     if not database.is_connected:
         await database.connect()
-    # create a dummy entry
+# Create missing tables
+    async with database:
+        if not await database.fetch_val("SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'users')"):
+            await database.execute("CREATE TABLE users (id SERIAL PRIMARY KEY, email VARCHAR(128) UNIQUE NOT NULL, active BOOLEAN NOT NULL DEFAULT TRUE)")
+# create a dummy entry
     await User.objects.get_or_create(email="test@test.com")
     # await User.objects.get_or_create(email="test2@test.com")
 
