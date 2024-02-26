@@ -13,8 +13,8 @@ webService:
 postgresStatefulSet:
   replicas: 2
   image:
-    repository: 690456518676.dkr.ecr.us-east-1.amazonaws.com/fastandtraefik
-    tag: postgres
+    repository: postgres
+    tag: 15-alpine
   port: 5432
   postgresUser: fastapi_traefik
   postgresPassword: fastapi_traefik
