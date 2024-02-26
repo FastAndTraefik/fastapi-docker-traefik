@@ -20,12 +20,12 @@ async def startup():
 
         # Check if users table exists
         async with database:
-            sql_fetch_table_users = "SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'users')"
+            sql_fetch_table_users = "SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'users');"
             users_table_exists = await database.fetch_val(sql_fetch_table_users)
         # If users table doesn't exist, create it
         if not users_table_exists:
             async with database:
-                sql_create_table = "CREATE TABLE users (id SERIAL PRIMARY KEY, email VARCHAR(128) UNIQUE NOT NULL, active BOOLEAN NOT NULL DEFAULT TRUE)"
+                sql_create_table = "CREATE TABLE users (id SERIAL PRIMARY KEY, email VARCHAR(128) UNIQUE NOT NULL, active BOOLEAN NOT NULL DEFAULT TRUE);"
                 await database.execute(sql_create_table)
 
         # Now that the table exists, create dummy entries
