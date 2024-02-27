@@ -29,4 +29,17 @@ spec:
           value: {{ .Values.postgresStatefulSet.locale }}
         - name: LANG
           value: {{ .Values.postgresStatefulSet.locale }}
+        volumeMounts:
+        - name: postgres-data
+          mountPath: /var/lib/postgresql/data
+  volumeClaimTemplates:
+  - metadata:
+      name: postgres-data
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      storageClassName:  gp2
+      resources:
+        requests:
+          storage: 1Gi
+
 
