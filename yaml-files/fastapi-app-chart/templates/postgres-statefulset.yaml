@@ -41,6 +41,6 @@ spec:
       resources:
         requests:
           storage: 1Gi
-      persistentVolumneReclaimPolicy: Retain
+      persistentVolumeReclaimPolicy: Retain
 
 
