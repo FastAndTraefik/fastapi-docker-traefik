@@ -8,6 +8,8 @@ from prometheus_client import generate_latest
 from app.db import database
 from app.db import User
 
+import time
+
 
 app = FastAPI(title="FastAPI, Docker, and Traefik")
 
@@ -31,6 +33,7 @@ def metrics():
 
 @app.on_event("startup")
 async def startup():
+    time.sleep(20)
     try:
         if not database.is_connected:
             await database.connect()
