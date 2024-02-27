@@ -111,6 +111,9 @@ jobs:
             echo 'EOF' >> $GITHUB_ENV
             kubectl config set-context arn:aws:eks:${{ vars.AWS_DEFAULT_REGION }}:${{ secrets.AWS_ACCOUNT }}:cluster/${{ vars.EKS_CLUSTER_NAME }}
 
+      - name: Get Short GitHub SHA and Save in Environment Variable
+        run: echo "SHORT_GITHUB_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+
       - name: Helm Deploy
         uses: koslib/helm-eks-action@master
         env:
