@@ -48,7 +48,7 @@ async def startup():
             await database.execute(sql_create_table)
 
         # Now that the table exists, create dummy entries
-        await User.objects.get_or_create(email="test100@test.com")
+        await User.objects.get_or_create(email="test1001@test.com")
     except Exception as e:
         print(f"An error occurred during startup: {e}")
 
