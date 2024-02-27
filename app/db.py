@@ -14,7 +14,6 @@ class BaseMeta(ormar.ModelMeta):
 
 
 class User(ormar.Model):
-    print(settings.db_url)
     class Meta(BaseMeta):
         tablename = "users"
 
