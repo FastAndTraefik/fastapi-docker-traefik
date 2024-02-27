@@ -3,30 +3,38 @@ name: Deploy App FastApi
 on:
   - push
   - pull_request
-  
+
 jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
-    # if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     steps:
+      - name: Check Workflow Pytest & flake8 status
+        run: |
+          if [[ "${{ github.event.workflow_run.conclusion }}" == "success" ]]; then
+            echo "Workflow A was successful"
+          else
+            echo "Workflow A failed"
+            exit 1
+          fi
       - name: Checkout
         uses: actions/checkout@v4
-  
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ vars.AWS_DEFAULT_REGION }}
-  
+
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
-  
+
       - name: Get Short GitHub SHA and Save in Environment Variable
         run: echo "SHORT_GITHUB_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
-  
+
       - name: Build, tag, and push the image to Amazon ECR
         id: build-image
         env:
@@ -35,13 +43,13 @@ jobs:
           IMAGE_TAG: latest
         run: |
           echo "Building Docker image..."
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY:$SHORT_GITHUB_SHA . 
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY:$SHORT_GITHUB_SHA .
           echo "Docker image built successfully."
-      
+
           echo "Pushing Docker image to ECR..."
           docker push $ECR_REGISTRY/$ECR_REPOSITORY --all-tags
           echo "Docker image pushed successfully."
-  
+
   deploy_prod:
     name: Deploy Production
     runs-on: ubuntu-latest
@@ -49,13 +57,12 @@ jobs:
     permissions:
       id-token: write
       contents: read
-    environment: 
+    environment:
       name: production
-      url: http://final-project.devops-fairy.cloudns.biz/
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -63,43 +70,40 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ vars.AWS_DEFAULT_REGION }}
 
-      # ### Terraform ###
-      # - name: Setup Terraform
-      #   uses: hashicorp/setup-terraform@v3
-      #   with:
-      #     terraform_version: 1.7.3
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.7.3
 
-      # - name: Terraform Formatting
-      #   id: fmt
-      #   run: terraform fmt -check
-      #   continue-on-error: true
+      - name: Terraform Formatting
+        id: fmt
+        run: terraform fmt -check
+        continue-on-error: true
 
-      # - name: Terraform Init
-      #   id: init
-      #   working-directory: ./cluster
-      #   run: terraform init
+      - name: Terraform Init
+        id: init
+        working-directory: ./cluster
+        run: terraform init
 
-      # - name: Terraform Validate
-      #   id: validate
-      #   working-directory: ./cluster
-      #   run: terraform validate -no-color
+      - name: Terraform Validate
+        id: validate
+        working-directory: ./cluster
+        run: terraform validate -no-color
 
-      # - name: Terraform Plan
-      #   id: plan
-      #   working-directory: ./cluster
-      #   run: terraform plan -no-color -lock=false
-      #   # if: github.event_name == 'pull_request'
-      #   continue-on-error: true
+      - name: Terraform Plan
+        id: plan
+        working-directory: ./cluster
+        run: terraform plan -no-color -lock=false
+        if: github.event_name == 'pull_request'
+        continue-on-error: true
 
-      # # TODO: This cannot be used yet as the tf state is not correctly
-      # # saved in the S3 bucket
-      # - name: Terraform Plan Status
-      #   if: steps.plan.outcome == 'failure'
-      #   run: exit 1
-      # - name: Terraform Apply
-      #   working-directory: ./cluster
-      #   # if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-      #   run: terraform apply -auto-approve -input=false -lock=false
+      - name: Terraform Plan Status
+        if: steps.plan.outcome == 'failure'
+        run: exit 1
+      - name: Terraform Apply
+        working-directory: ./cluster
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: terraform apply -auto-approve -input=false -lock=false
 
       - name: Helm Setup
         uses: koslib/helm-eks-action@master
